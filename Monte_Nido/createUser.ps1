@@ -8,7 +8,7 @@ Import-Module ActiveDirectory
 $oldAduser = Read-Host "Please enter old first and last name "
 $oldFirstname,$oldLastname = $oldAduser.split(" ");
 $oldAduserSAM = $oldFirstname[0]+$oldLastname;
-$aduserobj = ( Get-aduser -identity $oldAduserSAM )
+$oldAduserobj = ( Get-aduser -identity $oldAduserSAM -properties *)
 
 # Get new user information
 $newAduser = Read-Host -Prompt 'type the name of the new user '
@@ -16,10 +16,6 @@ $newfirstname,$newlastname = $newAduser.split(" ");
 $newAduserSAM = $newfirstname[0]+$newlastname;
 
 
-# Get domain and OU and UPN ( "@dplabs.com")
-$DN = (Get-ADUser  $oldAduserSAM -Properties *).CanonicalName.Split("/")[0]
-$OU = (Get-ADUser  $oldAduserSAM -Properties *).CanonicalName.Split("/")[1]
-$UPN = ("@"+$DN)
 
 # Setting template UPN property to null
 $newUserAttrib.UserPrincipalName = $null
@@ -32,7 +28,7 @@ $newUserAttrib = @{
     GivenName = $newFirstname
     Surname = $newLastname
     DisplayName = "$($newFirstname) $($newLastname)"
-    UserPrincipalName = "$($newAduserSAM)@$($DN)"
+    UserPrincipalName = $oldAduserobj.userprincipalname.Replace($oldAduserSAM,$newAduserSAM)
     sAMAccountName = $newAduserSAM
     Description = ""
     Office = ""
@@ -45,13 +41,6 @@ $newUserAttrib = @{
     AccountPassword = "Welcome11" | ConvertTo-SecureString -AsPlainText -Force
 
 }
-<# Grab all needed information from template user#>
-#-----------------------------------------------------------------
-
-
-
-# Create new user
-# New-ADUser -Name "$($newFirstname) $($lname)" -GivenName $fname -Surname $lname -Instance $newUserAttrib -SamAccountName $formatname -UserPrincipalName $formatname$UPN -DisplayName "$($fname) $($lname)" -AccountPassword (ConvertTo-SecureString -AsPlainText "$newPass" -Force) -ChangePasswordAtLogon $true -Enabled $true
 
 
 $targetDN = get-aduser -identity $oldAduserSAM | Select-Object -ExpandProperty DistinguishedName
