@@ -47,6 +47,7 @@ $newUserAttrib = @{
 #-----------------------------------------------------------------
 
 
+#test
 
 # Create new user
 # New-ADUser -Name "$($fname) $($lname)" -GivenName $fname -Surname $lname -Instance $newUserAttrib -SamAccountName $formatname -UserPrincipalName $formatname$UPN -DisplayName "$($fname) $($lname)" -AccountPassword (ConvertTo-SecureString -AsPlainText "$newPass" -Force) -ChangePasswordAtLogon $true -Enabled $true
