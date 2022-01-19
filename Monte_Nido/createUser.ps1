@@ -52,11 +52,10 @@ $newUserAttrib = @{
 
 # Create new user
 # New-ADUser -Name "$($newFirstname) $($lname)" -GivenName $fname -Surname $lname -Instance $newUserAttrib -SamAccountName $formatname -UserPrincipalName $formatname$UPN -DisplayName "$($fname) $($lname)" -AccountPassword (ConvertTo-SecureString -AsPlainText "$newPass" -Force) -ChangePasswordAtLogon $true -Enabled $true
-$location = read-host "Target path to place user"
-New-ADUser @newUserAttrib -Path "$location"
 
 
-
+$targetDN = get-aduser -identity $oldAduserSAM | Select-Object -ExpandProperty DistinguishedName
+New-ADUser @newUserAttrib -Path $TARGETDN.substring($targetDN.IndexOf("OU="))
 
 # Added new user to previous user groups
 foreach ( $group in (Get-ADUser $oldAduserSAM -Properties MemberOf).Memberof){
