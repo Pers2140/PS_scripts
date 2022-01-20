@@ -1,6 +1,6 @@
 #Enter New User Information First and Last Names
-$Newname = Read-Host -Prompt 'type the name of the user '
-$firstname,$lastname = $newname.split(" ");
+$newName= Read-Host -Prompt 'type the name of the user '
+$firstname,$lastname = $newName.split(" ");
 $aduser = $firstname[0]+$lastname;
 $aduserobj = ( Get-aduser -identity $aduser )
 
@@ -35,3 +35,7 @@ write-host "`n Hid account from address list ...`n"
 # Move AD object to OU “TERM Converted to Shared Mailbox”
 Move-ADObject -Identity $aduserobj.ObjectGUID -TargetPath 'OU="TERM Converted to Shared Mailbox",OU="Termination prep and on leave",DC=MNA,DC=local'
 write-host "`n Move AD object to | OU TERM Converted to Shared Mailbox | ...`n"
+
+# Connect to exchange to convert mailbox
+Connect-ExchangeOnline -UserPrincipalName VitalMSP@montenidoaffiliates.com
+Set-Mailbox "$newName" -type Shared
