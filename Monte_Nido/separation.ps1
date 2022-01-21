@@ -39,3 +39,6 @@ write-host "`n Move AD object to | OU TERM Converted to Shared Mailbox | ...`n"
 # Connect to exchange to convert mailbox
 Connect-ExchangeOnline -UserPrincipalName VitalMSP@montenidoaffiliates.com
 Set-Mailbox "$newName" -type Shared
+
+write-host "`n Remove licenses and disable account manually `n"
+write-host "`n Remove user from Sharefile => https://montenido.sharefile.com/ `n"
