@@ -1,5 +1,5 @@
 #Enter New User Information First and Last Names
-$newName= Read-Host -Prompt 'type the name of the user '
+$newName= Read-Host -Prompt 'type the name of the user ex. james carter '
 $firstname,$lastname = $newName.split(" ");
 $aduser = $firstname[0]+$lastname;
 $aduserobj = ( Get-aduser -identity $aduser )
@@ -42,3 +42,4 @@ Set-Mailbox "$newName" -type Shared
 
 write-host "`n Remove licenses and disable account manually `n"
 write-host "`n Remove user from Sharefile => https://montenido.sharefile.com/ `n"
+

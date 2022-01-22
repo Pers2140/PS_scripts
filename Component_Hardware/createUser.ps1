@@ -56,6 +56,25 @@ $manager = Get-ADUser $oldAduserSAM -Properties Manager | Select -ExpandProperty
 Set-ADUser -Identity $newAduserSAM -Manager $manager
 # Attribute adjustments
 
+# change mail nickname
+set-aduser -identity brink -replace @{mailNickname=$newAduserSAM}
+
+# change mail attribute
+$SMTPmail = read-host "`n What will be this user's main email `n choices: `n $newAduserSAM@montenidoaffiliates.com `n $newAduserSAM@clementineprograms.com `n $newAduserSAM@oliverpyattcenters.com `n $newAduserSAM@montenido.com `n"
+set-aduser -identity brink -replace @{mail=$mail}
+
+## Set SMTP mail address
+$addresses = $newAduserSAM+'@montenidoaffiliates.com' , $newAduserSAM+'@clementineprograms.com' , $newAduserSAM+'@oliverpyattcenters.com' , $newAduserSAM+'@montenido.com'
+$proxyAddresses = @()
+
+foreach ( $a in $addresses ){
+    
+    if ( $a -ne '$SMTPmail' ){
+        
+        $proxyAddresses = $proxyAddresses + $a
+    }
+}
+
 cls
 
 # Reset password
