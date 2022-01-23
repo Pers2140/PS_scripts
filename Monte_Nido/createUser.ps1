@@ -56,6 +56,43 @@ $manager = Get-ADUser $oldAduserSAM -Properties Manager | Select -ExpandProperty
 Set-ADUser -Identity $newAduserSAM -Manager $manager
 # Attribute adjustments
 
+# change mail nickname
+set-aduser -identity brink -replace @{mailNickname=$newAduserSAM}
+
+# change mail attribute
+Write-Host @"
+
+
+*******************************************************************
+- EUser @ one of the four depending on location as shown in Site Acronym Document and at bottom of this guide
+
+EUser@montenidoaffiliates.com Remote Staff and staff working at MNA
+EUser@oliverpyattcenters.com Oliver Pyatt Centers
+EUser@clementineprograms.com Clementine Programs
+EUser@Montenido.com Monte Nido and Eating Disorder Center of xyz
+*******************************************************************
+
+
+"@
+
+$SMTPmail = read-host "`n What will be this user's main SMTP email `n choices: `n @montenidoaffiliates.com `n @clementineprograms.com `n @oliverpyattcenters.com `n @montenido.com `n`n"
+set-aduser -identity $newAduserSAM -replace @{mail=$newAduserSAM+$SMTPmail}
+
+## Set SMTP mail address
+$addresses = '@montenidoaffiliates.com' , '@clementineprograms.com' , '@oliverpyattcenters.com' , '@montenido.com'
+$proxyAddresses = @("SMTP:$SMTPmail")
+
+foreach ( $a in $addresses ){
+    
+    if ( $a -ne $SMTPmail ){
+        
+        $proxyAddresses = $proxyAddresses + "smtp:$a"
+    }
+}
+
+$proxyAddresses
+set-aduser -identity $newAduserSAM -Add @{ProxyAddresses=$proxyAddresses}
+
 cls
 
 # Reset password
