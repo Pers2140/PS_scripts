@@ -80,13 +80,13 @@ set-aduser -identity $newAduserSAM -replace @{mail=$newAduserSAM+$SMTPmail}
 
 ## Set SMTP mail address
 $addresses = '@montenidoaffiliates.com' , '@clementineprograms.com' , '@oliverpyattcenters.com' , '@montenido.com'
-$proxyAddresses = @("SMTP:$SMTPmail")
+$proxyAddresses = @("SMTP:$newAduserSAM$SMTPmail")
 
 foreach ( $a in $addresses ){
     
     if ( $a -ne $SMTPmail ){
         
-        $proxyAddresses = $proxyAddresses + "smtp:$a"
+        $proxyAddresses = $proxyAddresses + "smtp:$newAduserSAM$a"
     }
 }
 
