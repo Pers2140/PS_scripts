@@ -57,7 +57,7 @@ Set-ADUser -Identity $newAduserSAM -Manager $manager
 # Attribute adjustments
 
 # change mail nickname
-set-aduser -identity brink -replace @{mailNickname=$newAduserSAM}
+set-aduser -identity $newAduserSAM  -add @{mailNickname=$newAduserSAM}
 
 # change mail attribute
 Write-Host @"
@@ -76,11 +76,11 @@ EUser@Montenido.com Monte Nido and Eating Disorder Center of xyz
 "@
 
 $SMTPmail = read-host "`n What will be this user's main SMTP email `n choices: `n @montenidoaffiliates.com `n @clementineprograms.com `n @oliverpyattcenters.com `n @montenido.com `n`n"
-set-aduser -identity $newAduserSAM -replace @{mail=$newAduserSAM+$SMTPmail}
+set-aduser -identity $newAduserSAM -replace @{mail=$newAduserSAM$SMTPmail}
 
 ## Set SMTP mail address
 $addresses = '@montenidoaffiliates.com' , '@clementineprograms.com' , '@oliverpyattcenters.com' , '@montenido.com'
-$proxyAddresses = @("SMTP:$newAduserSAM+$SMTPmail")
+$proxyAddresses = @("SMTP:$newAduserSAM$SMTPmail")
 
 foreach ( $a in $addresses ){
     
