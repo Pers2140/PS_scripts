@@ -4,6 +4,7 @@ $firstname,$lastname = $newName.split(" ");
 $aduser = $firstname[0]+$lastname;
 $aduserobj = ( Get-aduser -identity $aduser )
 
+
 # Disable user 
 Disable-ADAccount -Identity $aduser
 write-host "`n Finished disabling user ...`n"
@@ -40,6 +41,24 @@ write-host "`n Move AD object to | OU TERM Converted to Shared Mailbox | ...`n"
 Connect-ExchangeOnline -UserPrincipalName VitalMSP@montenidoaffiliates.com
 Set-Mailbox "$newName" -type Shared
 
+# Remove O365 licenses
+$userUPN=$aduserobj.UserPrincipalName
+$userList = Get-AzureADUser -ObjectID $userUPN
+$Skus = $userList | Select -ExpandProperty AssignedLicenses | Select SkuID
+if($userList.Count -ne 0) {
+    if($Skus -is [array])
+    {
+        $licenses = New-Object -TypeName Microsoft.Open.AzureAD.Model.AssignedLicenses
+        for ($i=0; $i -lt $Skus.Count; $i++) {
+            $Licenses.RemoveLicenses +=  (Get-AzureADSubscribedSku | Where-Object -Property SkuID -Value $Skus[$i].SkuId -EQ).SkuID   
+        }
+        Set-AzureADUserLicense -ObjectId $userUPN -AssignedLicenses $licenses
+    } else {
+        $licenses = New-Object -TypeName Microsoft.Open.AzureAD.Model.AssignedLicenses
+        $Licenses.RemoveLicenses =  (Get-AzureADSubscribedSku | Where-Object -Property SkuID -Value $Skus.SkuId -EQ).SkuID
+        Set-AzureADUserLicense -ObjectId $userUPN -AssignedLicenses $licenses
+    }
+}
+
 write-host "`n Remove licenses and disable account manually `n"
 write-host "`n Remove user from Sharefile => https://montenido.sharefile.com/ `n"
-

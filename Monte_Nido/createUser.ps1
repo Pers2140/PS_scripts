@@ -93,6 +93,8 @@ foreach ( $a in $addresses ){
 $proxyAddresses
 set-aduser -identity $newAduserSAM -Add @{ProxyAddresses=$proxyAddresses}
 
+# Sync Files
+Start-ADSyncSyncCycle -PolicyType Delta
 cls
 
 # Reset password
