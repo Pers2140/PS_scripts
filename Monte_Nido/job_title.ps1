@@ -1,8 +1,9 @@
 #Enter New User Information First and Last Names
 $newName= Read-Host -Prompt 'type the name of the user ex. james carter '
-$firstSAAname,$lastname = $newName.split(" ");
+$firstname,$lastname = $newName.split(" ");
 $aduserSAM = $firstname[0]+$lastname;
-$aduserobj = ( Get-aduser -identity $aduser )
+$aduserobj = ( Get-aduser -identity $aduserSAM )
+
 
 # Search for correct extensionAttribute1 
 $search = read-host -Prompt 'enter search term for job title'
