@@ -23,7 +23,7 @@ write-host "`n Changed Title,Department,Company to 'Term' ...`n"
 
 #  Remove all security groups except Domain users
 $ADUser = Get-ADUser -Identity $aduser -Properties memberOf
-ForEach ($Group In $ADUser.memberOf)
+ForEach ($Group In $ADUser.memberOf)Heather Paul
 {
     Remove-ADGroupMember -Identity $Group -Members $ADUser
 }
@@ -43,6 +43,7 @@ Set-Mailbox "$newName" -type Shared
 
 # Remove O365 licenses
 $userUPN=$aduserobj.UserPrincipalName
+Connect-AzureAD -UserPrincipalName VitalMSP@montenidoaffiliates.com
 $userList = Get-AzureADUser -ObjectID $userUPN
 $Skus = $userList | Select -ExpandProperty AssignedLicenses | Select SkuID
 if($userList.Count -ne 0) {

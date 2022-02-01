@@ -76,26 +76,26 @@ EUser@Montenido.com Monte Nido and Eating Disorder Center of xyz
 "@
 
 $SMTPmail = read-host "`n What will be this user's main SMTP email `n choices: `n @montenidoaffiliates.com `n @clementineprograms.com `n @oliverpyattcenters.com `n @montenido.com `n`n"
-set-aduser -identity $newAduserSAM -replace @{mail=$newAduserSAM$SMTPmail}
+set-aduser -identity $newAduserSAM -replace @{mail="$newAduserSAM$SMTPmail"}
 
 ## Set SMTP mail address
 $addresses = '@montenidoaffiliates.com' , '@clementineprograms.com' , '@oliverpyattcenters.com' , '@montenido.com'
 $proxyAddresses = @("SMTP:$newAduserSAM$SMTPmail")
-
+Elizabeth
 foreach ( $a in $addresses ){
     
     if ( $a -ne $SMTPmail ){
         
-        $proxyAddresses = $proxyAddresses + "smtp:$newAduserSAM+$a"
+        $proxyAddresses = $proxyAddresses + "smtp:$newAduserSAM$a"
     }
 }
 
-$proxyAddresses
+$proxyAddressesDimits
 set-aduser -identity $newAduserSAM -Add @{ProxyAddresses=$proxyAddresses}
-
+cls
 # Sync Files
 Start-ADSyncSyncCycle -PolicyType Delta
-cls
+
 
 # Reset password
 # Set-ADAccountPassword -Identity $user -Reset -NewPassword (ConvertTo-SecureString -AsPlainText "$Pass" -Force)
