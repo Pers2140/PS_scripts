@@ -88,7 +88,7 @@ foreach ( $a in $addresses ){
         
         $proxyAddresses = $proxyAddresses + "smtp:$newAduserSAM$a"
     }
-}
+}ASTNMGRN-Assistant Nurse Manager, RN
 
 $proxyAddressesDimits
 set-aduser -identity $newAduserSAM -Add @{ProxyAddresses=$proxyAddresses}

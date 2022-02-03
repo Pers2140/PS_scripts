@@ -38,12 +38,12 @@ Move-ADObject -Identity $aduserobj.ObjectGUID -TargetPath 'OU="TERM Converted to
 write-host "`n Move AD object to | OU TERM Converted to Shared Mailbox | ...`n"
 
 # Connect to exchange to convert mailbox
-Connect-ExchangeOnline -UserPrincipalName VitalMSP@montenidoaffiliates.com
-Set-Mailbox "$newName" -type Shared
+Connect-ExchangeOnline -UserPrincipalName "VitalMSP@montenidoaffiliates.com"
+Set-Mailbox "nmeade@clementineprograms.com" -type Shared
 
 # Remove O365 licenses
-$userUPN=$aduserobj.UserPrincipalName
-Connect-AzureAD -UserPrincipalName VitalMSP@montenidoaffiliates.com
+$userUPN="nmeade@clementineprograms.com"
+Connect-AzureAD -UserPrincipalName "VitalMSP@montenidoaffiliates.com"
 $userList = Get-AzureADUser -ObjectID $userUPN
 $Skus = $userList | Select -ExpandProperty AssignedLicenses | Select SkuID
 if($userList.Count -ne 0) {
