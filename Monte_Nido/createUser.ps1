@@ -81,18 +81,18 @@ set-aduser -identity $newAduserSAM -replace @{mail="$newAduserSAM$SMTPmail"}
 ## Set SMTP mail address
 $addresses = '@montenidoaffiliates.com' , '@clementineprograms.com' , '@oliverpyattcenters.com' , '@montenido.com'
 $proxyAddresses = @("SMTP:$newAduserSAM$SMTPmail")
-Elizabeth
+
 foreach ( $a in $addresses ){
     
     if ( $a -ne $SMTPmail ){
         
         $proxyAddresses = $proxyAddresses + "smtp:$newAduserSAM$a"
     }
-}ASTNMGRN-Assistant Nurse Manager, RN
+}
 
 $proxyAddressesDimits
 set-aduser -identity $newAduserSAM -Add @{ProxyAddresses=$proxyAddresses}
-cls
+
 # Sync Files
 Start-ADSyncSyncCycle -PolicyType Delta
 

@@ -4,6 +4,12 @@ $firstname,$lastname = $newName.split(" ");
 $aduser = $firstname[0]+$lastname;
 $aduserobj = ( Get-aduser -identity $aduser )
 
+#Disconnect-AzAccount
+#Disconnect-ExchangeOnline
+#  get credentials
+#$Credential=Get-Credential
+#Connect-AzureAD
+#Connect-ExchangeOnline  
 
 # Disable user 
 Disable-ADAccount -Identity $aduser
@@ -23,9 +29,9 @@ write-host "`n Changed Title,Department,Company to 'Term' ...`n"
 
 #  Remove all security groups except Domain users
 $ADUser = Get-ADUser -Identity $aduser -Properties memberOf
-ForEach ($Group In $ADUser.memberOf)Heather Paul
+ForEach ($Group In $ADUser.memberOf)
 {
-    Remove-ADGroupMember -Identity $Group -Members $ADUser
+    Remove-ADGroupMember -Identity $Group -Members $ADUser -Confirm:$false
 }
 write-host "`n Removed all security groups except Domain users ...`n"
 
@@ -38,12 +44,14 @@ Move-ADObject -Identity $aduserobj.ObjectGUID -TargetPath 'OU="TERM Converted to
 write-host "`n Move AD object to | OU TERM Converted to Shared Mailbox | ...`n"
 
 # Connect to exchange to convert mailbox
-Connect-ExchangeOnline -UserPrincipalName "VitalMSP@montenidoaffiliates.com"
-Set-Mailbox "nmeade@clementineprograms.com" -type Shared
+Set-Mailbox $aduserobj.userprincipalname -type Shared
 
 # Remove O365 licenses
-$userUPN="nmeade@clementineprograms.com"
-Connect-AzureAD -UserPrincipalName "VitalMSP@montenidoaffiliates.com"
+$userUPN = $aduserobj.userprincipalname
+# Disable user
+Set-AzureADUser -ObjectID $userUPN -AccountEnabled $false
+
+# Run through licenses and remove
 $userList = Get-AzureADUser -ObjectID $userUPN
 $Skus = $userList | Select -ExpandProperty AssignedLicenses | Select SkuID
 if($userList.Count -ne 0) {
