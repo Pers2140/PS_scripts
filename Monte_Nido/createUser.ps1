@@ -58,7 +58,7 @@ Set-ADUser -Identity $newAduserSAM -Manager $manager
 
 # change mail nickname
 set-aduser -identity $newAduserSAM  -add @{mailNickname=$newAduserSAM}
-
+Abby Scheele
 # change mail attribute
 Write-Host @"
 
