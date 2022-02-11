@@ -6,11 +6,10 @@ $aduserobj = ( Get-aduser -identity $aduser )
 
 #Disconnect-AzAccount
 #Disconnect-ExchangeOnline
-#  get credentials
+
 #$Credential=Get-Credential
 #Connect-AzureAD
-#Connect-ExchangeOnline  
-
+  
 # Disable user 
 Disable-ADAccount -Identity $aduser
 write-host "`n Finished disabling user ...`n"
@@ -43,13 +42,16 @@ write-host "`n Hid account from address list ...`n"
 Move-ADObject -Identity $aduserobj.ObjectGUID -TargetPath 'OU="TERM Converted to Shared Mailbox",OU="Termination prep and on leave",DC=MNA,DC=local'
 write-host "`n Move AD object to | OU TERM Converted to Shared Mailbox | ...`n"
 
+Connect-ExchangeOnline
 # Connect to exchange to convert mailbox
 Set-Mailbox $aduserobj.userprincipalname -type Shared
+write-host "`n Changed User's mailbox to shared`n"
 
 # Remove O365 licenses
 $userUPN = $aduserobj.userprincipalname
 # Disable user
 Set-AzureADUser -ObjectID $userUPN -AccountEnabled $false
+write-host "`n Disabled user in Office 365 n"
 
 # Run through licenses and remove
 $userList = Get-AzureADUser -ObjectID $userUPN
