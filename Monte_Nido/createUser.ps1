@@ -95,7 +95,7 @@ set-aduser -identity $newAduserSAM -Add @{ProxyAddresses=$proxyAddresses}
 
 # Sync Files
 Start-ADSyncSyncCycle -PolicyType Delta
-cls
+
 
 # Reset password
 # Set-ADAccountPassword -Identity $user -Reset -NewPassword (ConvertTo-SecureString -AsPlainText "$Pass" -Force)
