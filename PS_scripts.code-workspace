@@ -1,8 +1,7 @@
 {
-	"folders": [
-		{
-			"path": "PS_scripts"
-		}
-	],
-	"settings": {}
+    "folders": [
+        {
+            "path": "."
+        }
+    ]
 }
