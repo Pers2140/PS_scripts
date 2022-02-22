@@ -42,6 +42,7 @@ $newUserAttrib = @{
 
 }
 
+
 $targetDN = get-aduser -identity $oldAduserSAM | Select-Object -ExpandProperty DistinguishedName
 New-ADUser @newUserAttrib -Path $TARGETDN.substring($targetDN.IndexOf("OU="))
 
@@ -70,6 +71,8 @@ EUser@oliverpyattcenters.com Oliver Pyatt Centers
 EUser@clementineprograms.com Clementine Programs
 EUser@Montenido.com Monte Nido and Eating Disorder Center of xyz
 *******************************************************************
+
+
 "@
 
 $SMTPmail = read-host "`n What will be this user's main SMTP email `n choices: `n @montenidoaffiliates.com `n @clementineprograms.com `n @oliverpyattcenters.com `n @montenido.com `n`n"
@@ -97,3 +100,61 @@ Start-ADSyncSyncCycle -PolicyType Delta
 # Reset password
 # Set-ADAccountPassword -Identity $user -Reset -NewPassword (ConvertTo-SecureString -AsPlainText "$Pass" -Force)
 
+write-host "`n add Zoom licenses  `n"
+write-host "`n add user to Sharefile => https://montenido.sharefile.com/ `n"
+[system.Diagnostics.Process]::Start("chrome","https://montenido.sharefile.com/users/clients/browse")
+[system.Diagnostics.Process]::Start("chrome","https://montenido.zoom.us/account/user#/")
+
+# setup remote desktop
+$Server="mna-rds.mna.local"
+$User="MNA\$newAduserSAM"
+$Password="Welcome11"
+$SecurePassword = $Password | ConvertTo-SecureString -AsPlainText -Force
+
+cmdkey /generic:$Server /user:$User /pass:$SecurePassword
+mstsc /v:$Server /h:1080 /w:1920
+write-host "`n `n `n"
+Write-Host @" 
+** For Sharefile **
+
+Hello,
+
+I just sent you an e-mail link to activate your MN&A Citrix Share File Account.
+
+This online file share service contains all the MN&A Kipu & Clinical documentation plus training materials.
+
+Enjoy!
+"@
+write-host "`n `n `n"
+Write-Host @"
+
+Hello Michelle,
+
+I have created $newfirstname  account, here is the login information.
+
+Username:$newAduserSAM
+Email: $newAduserSAM$SMTPmail
+Password: Welcome11
+
+I have created the Zoom and Sharefile accounts and sent to users email.
+
+Adding internal IT for additional access.
+
+Thank you,
+"@
+write-host "`n `n `n"
+Write-Host @"
+
+Make sure the following apps are selected: Azure Rights Management
+
+- Common Data Service
+
+- Exchange Online (Plan 2)
+
+- Information Protection for Office 365 - Standard
+
+- Microsoft 365 Apps for enterprise
+
+* Disable OWA for Oulook Apps
+Monte Nido & Affiliates
+"@
