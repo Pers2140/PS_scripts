@@ -13,4 +13,3 @@ $ea1 = Read-Host -Prompt 'enter correct extensionAttribute1'
 # Replace title and extensionAttribute1
 set-aduser -Identity $aduserSAM -Replace @{description=$ea1;title=$ea1;extensionAttribute1=$ea1}
 
-@montenidoaffiliates.com

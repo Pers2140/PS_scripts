@@ -42,7 +42,6 @@ $newUserAttrib = @{
 
 }
 
-
 $targetDN = get-aduser -identity $oldAduserSAM | Select-Object -ExpandProperty DistinguishedName
 New-ADUser @newUserAttrib -Path $TARGETDN.substring($targetDN.IndexOf("OU="))
 
@@ -71,8 +70,6 @@ EUser@oliverpyattcenters.com Oliver Pyatt Centers
 EUser@clementineprograms.com Clementine Programs
 EUser@Montenido.com Monte Nido and Eating Disorder Center of xyz
 *******************************************************************
-
-
 "@
 
 $SMTPmail = read-host "`n What will be this user's main SMTP email `n choices: `n @montenidoaffiliates.com `n @clementineprograms.com `n @oliverpyattcenters.com `n @montenido.com `n`n"
