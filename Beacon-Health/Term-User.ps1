@@ -8,10 +8,13 @@ pause
 # Disable user
 Set-AzureADUser -ObjectID $user_OBJ.UserPrincipalName -AccountEnabled $false
 
-write-host "`n Disabled user in Office 365 n"
+
 # Get user group memberships
-$user_groupMemberships = (Get-AzureADUser -ObjectId $user_OBJ.ObjectId).ObjectID
-$user_groupMemberships
+$user_groupMemberships = (Get-AzureADUserMembership -ObjectId $user_OBJ.ObjectId) 
+
+
+# Update fields to Term to remove from Dynamic groups
+Set-AzureADUser -ObjectId $user_OBJ.ObjectId -JobTitle "Term - $($user_OBJ.JobTitle)" -Department "Term - $($user_OBJ.Department)" -CompanyName "Term - $($user_OBJ.CompanyName)"
 
 # Loop throught groups and remove user except for "All User" group
 foreach ( $group in $user_groupMemberships){
@@ -19,7 +22,7 @@ foreach ( $group in $user_groupMemberships){
     if ( $group -ne '5c2e06f5-2516-425d-965b-979d7161b187'){
         
         #write-host 'Removing from group' (Get-AzureADGroup -ObjectId $group).DisplayName
-        Remove-AzureADGroupMember -ObjectId $group -MemberId $user_OBJ.ObjectId
+        Remove-AzureADGroupMember -ObjectId $group.ObjectID -MemberId $user_OBJ.ObjectId
         
 
     }else{
@@ -30,8 +33,6 @@ foreach ( $group in $user_groupMemberships){
 
 }
 
-# Update fields to Term to remove from Dynamic groups
-Set-AzureADUser -ObjectId $user_OBJ.ObjectId -JobTitle "Term - $($user_OBJ.JobTitle)" -Department "Term - $($user_OBJ.Department)" -CompanyName "Term - $($user_OBJ.CompanyName)"
 
 
 # Check if emails will need to be forwarded
@@ -93,7 +94,7 @@ Write-Host @"
 
 Hi Tammy,
 
-Lisa Guthrie account has been Offboarded and emails forwarded to cgraham@beaconhc.net
+$username account has been Offboarded and emails forwarded to $forward_email
 
 
 
