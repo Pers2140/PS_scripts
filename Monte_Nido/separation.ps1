@@ -7,7 +7,7 @@ $aduserobj = ( Get-aduser -identity $aduser )
 write-host "`n"$aduserobj.name"will be Separated! `n "  -ForegroundColor Red 
 $outputUser = read-host -Prompt "`n ... continue? 1 for yes `n"
 
-if ( $outputUser ){
+if ( $outputUser = '1' ){
 
     write-host "`n Proceeding with separation ... `n"
     #Disconnect-AzAccount
