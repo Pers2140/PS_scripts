@@ -91,21 +91,22 @@ if($userList.Count -ne 0) {
 
 Write-Host @"
 
-Hi Tammy,
+Off-boarding have been completed for $username
+**********************************
+Reset password
+Block Office 365 sign-in, this also initiates a one-time sign out.
+Remove from any and all groups (to remove from dynamic groups add "Term - " to the start of the Job Title, Department, and Company name fields of the user) ex
+Remove from teams channels
+Convert email to shared mailbox.
+Removed Office license
+To remove from e-fax group : Email sent to Lingo team
+Prime-view access : user removed from Primeview
+Email forwarded to : $forward_email
+Onedrive access provided to Cameo Mundt , Please access $username's One Drive and copy file to your account. link: https://beaconhc-my.sharepoint.com/personal/cmundt_washington-ltc_com
+Kindly check and revert if need help with this.
 
-Lisa Guthrie account has been Offboarded and emails forwarded to cgraham@beaconhc.net
-
-
-
-*** Internal Notes ***
-
-- Reset password
-- Block Office 365 sign-in
-- Remove from any and all groups except the "All Users" group
-- Forwarded emails to cgraham@beaconhc.net
-- Convert email to shared mailbox
-- Removed License
-- Sent email to remove from Fax
+To Remove PCC and DSSI account : Email sent to Maria and Andrew.
+************************************
 
 
 "@
