@@ -1,4 +1,4 @@
-#Connect-AzureAD
+# Connect-AzureAD
 # Get user object
 $username = (read-host "`n Enter user to be terminated ") 
 $user_OBJ = (Get-AzureADUser -SearchString $username)
@@ -43,6 +43,7 @@ if ( $forward_email.Length -gt 1 ) {
     write-host "forwarded to $($forward_email)"
      #Connect to exchange to convert mailbox and hide from GAL or forward to email 
      Connect-ExchangeOnline
+     Set-Mailbox -Identity $user_OBJ.DisplayName -Type Shared 
      Set-Mailbox -Identity $user_OBJ.DisplayName -ForwardingAddress $forward_email
      Set-Mailbox $user_OBJ.UserPrincipalName -HiddenFromAddressListsEnabled $true
      write-host "`n Changed User's mailbox to shared and forwarded to $($forward_email)`n "
@@ -51,7 +52,7 @@ if ( $forward_email.Length -gt 1 ) {
     write-host "not forwarding"
     # Connect to exchange to convert mailbox and hide from GAL or forward to email 
     Connect-ExchangeOnline
-    Set-Mailbox -Identity $user_OBJ.DisplayName 
+    Set-Mailbox -Identity $user_OBJ.DisplayName -Type Shared 
     Set-Mailbox $user_OBJ.UserPrincipalName -HiddenFromAddressListsEnabled $true
     write-host "`n Changed User's mailbox to shared`n"
 
@@ -103,7 +104,7 @@ $username account has been Offboarded and emails forwarded to $forward_email
 - Reset password
 - Block Office 365 sign-in
 - Remove from any and all groups except the "All Users" group
-- Forwarded emails to cgraham@beaconhc.net
+- Forwarded emails to $forward_email
 - Convert email to shared mailbox
 - Removed License
 - Sent email to remove from Fax

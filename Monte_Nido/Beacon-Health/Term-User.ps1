@@ -1,4 +1,4 @@
-#Connect-AzureAD
+    #Connect-AzureAD
 # Get user object
 $username = (read-host "`n Enter user to be terminated ") 
 $user_OBJ = (Get-AzureADUser -SearchString $username)
