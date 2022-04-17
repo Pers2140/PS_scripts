@@ -46,11 +46,33 @@ if ( $outputUser = '1' ){
     # Move AD object to OU “TERM Converted to Shared Mailbox”
     Move-ADObject -Identity $aduserobj.ObjectGUID -TargetPath 'OU="TERM Converted to Shared Mailbox",OU="Termination prep and on leave",DC=MNA,DC=local'
     write-host "`n Move AD object to | OU TERM Converted to Shared Mailbox | ...`n"
+    
+    # Check if emails will need to be forwarded
+    $forward_email = read-host "Will emails need to be forwarded? If so where? If not hit ENTER"
 
-    Connect-ExchangeOnline
+    if ( $forward_email.Length -gt 1 ) {
+        write-host "forwarded to $($forward_email)"
+        #Connect to exchange to convert mailbox and hide from GAL or forward to email 
+        Connect-ExchangeOnline
+        Set-Mailbox -Identity $aduserobj.DisplayName -Type Shared 
+        Set-Mailbox -Identity $aduserobj.DisplayName -ForwardingAddress $forward_email
+        Set-Mailbox $aduserobj.UserPrincipalName -HiddenFromAddressListsEnabled $true
+        write-host "`n Changed User's mailbox to shared and forwarded to $($forward_email)`n "
+
+    }else{
+        write-host "not forwarding"
+        # Connect to exchange to convert mailbox and hide from GAL or forward to email 
+        Connect-ExchangeOnline
+        Set-Mailbox -Identity $aduserobj.DisplayName -Type Shared 
+        Set-Mailbox $aduserobj.UserPrincipalName -HiddenFromAddressListsEnabled $true
+        write-host "`n Changed User's mailbox to shared`n"
+
+    }
+
+    # Connect-ExchangeOnline
     # Connect to exchange to convert mailbox
-    Set-Mailbox $aduserobj.userprincipalname -type Shared
-    write-host "`n Changed User's mailbox to shared`n"
+    # Set-Mailbox $aduserobj.userprincipalname -type Shared
+    # write-host "`n Changed User's mailbox to shared`n"
 
     # Remove O365 licenses
     $userUPN = $aduserobj.userprincipalname
