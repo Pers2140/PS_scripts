@@ -1,6 +1,6 @@
 
 Import-Module ActiveDirectory
-
+#Connect-MsolService
 <# Grab all needed information from template user#>
 #-----------------------------------------------------------------
 
@@ -11,9 +11,9 @@ $oldAduserSAM = $oldFirstname[0]+$oldLastname;
 $oldAduserobj = ( Get-aduser -identity $oldAduserSAM -properties *)
 
 # Get new user information
-$newAduser = "Kristin Anderson"
+$newAduser = "Jai-La Evans"
 $newfirstname,$newlastname = $newAduser.split(" ");
-$newAduserSAM = "KBAnderson";
+$newAduserSAM = "JEvans";
 
 
 
@@ -95,15 +95,24 @@ set-aduser -identity $newAduserSAM -Add @{ProxyAddresses=$proxyAddresses}
 
 # Sync Files
 Start-ADSyncSyncCycle -PolicyType Delta
+Start-Sleep 5 
+Write-host "Giving time to Sync ..."
+# Change user's password to Welcome11 and enable MFA
+
+#(Get-MsolUser -UserPrincipalName JLigasan@montenidoaffiliates.com).StrongAuthenticationMethods
+#Set-MsolUser -UserPrincipalName $newUserAttrib.UserPrincipalName -StrongAuthenticationMethods @()
+#Set-MsolUserPassword -UserPrincipalName $newUserAttrib.UserPrincipalName -NewPassword "Welcome11"
 
 
 # Reset password
 # Set-ADAccountPassword -Identity $user -Reset -NewPassword (ConvertTo-SecureString -AsPlainText "$Pass" -Force)
 
+<#
 write-host "`n add Zoom licenses  `n"
 write-host "`n add user to Sharefile => https://montenido.sharefile.com/ `n"
 [system.Diagnostics.Process]::Start("chrome","https://montenido.sharefile.com/users/clients/browse")
 [system.Diagnostics.Process]::Start("chrome","https://montenido.zoom.us/account/user#/")
+#>
 
 # setup remote desktop
 $Server="mna-rds.mna.local"

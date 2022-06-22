@@ -1,106 +1,171 @@
-#Enter New User Information First and Last Names
-$Newname = Read-Host -Prompt 'type the name of the user '
-$newfirst,$newlast = $newname.split(" ");
-$newaduser = $newfirst[0]+$newlast;
 
-#compose the password
-Function Get-RandomAlphanumericString {
-	
-	[CmdletBinding()]
-	Param (
-        [int] $length = 8
-	)
+Import-Module ActiveDirectory
+#Connect-MsolService
+<# Grab all needed information from template user#>
+#-----------------------------------------------------------------
 
-	Begin{
-	}
+# Get old user to copy
+$oldAduser = Read-Host "Please enter old first and last name "
+$oldFirstname,$oldLastname = $oldAduser.split(" ");
+$oldAduserSAM = $oldFirstname[0]+$oldLastname;
+$oldAduserobj = ( Get-aduser -identity $oldAduserSAM -properties *)
 
-	Process{
-        Write-Output ( -join ((0x30..0x39) + ( 0x41..0x5A) + ( 0x61..0x7A) | Get-Random -Count $length  | % {[char]$_}) )
-	}	
+# Get new user information
+$newAduser = Read-Host "Please enter new user "
+$newfirstname,$newlastname = $newAduser.split(" ");
+$newAduserSAM = $newfirstname[0]+$newlastname;
+
+
+
+# Setting template UPN property to null
+# $newUserAttrib.UserPrincipalName = $null
+# Splat all copied variables into one using template user properties
+# $newUserAttrib = Get-ADUser -Identity $usertoCopy -Properties StreetAddress, City, Title, PostalCode, Office, Department, Manager
+$newUserAttrib = @{
+    Enable = $true
+    ChangePasswordAtLogon = $true
+    Name = "$($newFirstname) $($newLastname)"
+    GivenName = $newFirstname
+    Surname = $newLastname
+    DisplayName = "$($newFirstname) $($newLastname)"
+    UserPrincipalName = $newAduserSAM+'@'+$oldAduserobj.userprincipalname.split('@')[1]
+    sAMAccountName = $newAduserSAM
+    Description = $oldAduserobj.Description
+    Office = $oldAduserobj.office
+    Company = $oldAduserobj.Company
+    Department = $oldAduserobj.Department
+    Title = $oldAduserobj.title
+    City = $oldAduserobj.City
+    State = $oldAduserobj.State
+
+    AccountPassword = "Welcome11" | ConvertTo-SecureString -AsPlainText -Force
+
 }
 
-$pass = (Get-RandomAlphanumericString | Tee-Object -variable teeTime )
-write-host User Password is: $pass
+
+$targetDN = get-aduser -identity $oldAduserSAM | Select-Object -ExpandProperty DistinguishedName
+New-ADUser @newUserAttrib -Path $TARGETDN.substring($targetDN.IndexOf("OU="))
+
+# Added new user to previous user groups
+foreach ( $group in (Get-ADUser $oldAduserSAM -Properties MemberOf).Memberof){
+    Add-ADGroupMember -Identity $group -Members $newAduserSAM
+}
+
+# Set manager 
+$manager = Get-ADUser $oldAduserSAM -Properties Manager | Select -ExpandProperty Manager
+Set-ADUser -Identity $newAduserSAM -Manager $manager
+# Attribute adjustments
+
+# change mail nickname
+set-aduser -identity $newAduserSAM  -add @{mailNickname=$newAduserSAM}
+
+# change mail attribute
+Write-Host @"
 
 
+*******************************************************************
+- EUser @ one of the four depending on location as shown in Site Acronym Document and at bottom of this guide
 
-#Create the User in AD
-$newuser = New-ADUser `
--Name $newaduser `
--GivenName $newfirst  `
--Surname $newlast `
--DisplayName $Newname `
--UserPrincipalName $newaduser@ceramictechnics.com `
--AccountPassword (Read-Host -AsSecureString "Input User Password") `
--Enabled $True;
+EUser@montenidoaffiliates.com Remote Staff and staff working at MNA
+EUser@oliverpyattcenters.com Oliver Pyatt Centers
+EUser@clementineprograms.com Clementine Programs
+EUser@Montenido.com Monte Nido and Eating Disorder Center of xyz
+*******************************************************************
 
 
-#Enter the User to be copied information First and Last Name
-$oldname = Read-Host -Prompt 'type the name of the user to copy';
-$oldfirst,$oldlast = $oldname.split(" ");
-$olduser = $oldfirst[0]+$oldlast
+"@
+
+$SMTPmail = read-host "`n What will be this user's main SMTP email `n choices: `n @montenidoaffiliates.com `n @clementineprograms.com `n @oliverpyattcenters.com `n @montenido.com `n`n"
+set-aduser -identity $newAduserSAM -replace @{mail="$newAduserSAM$SMTPmail"}
+
+## Set SMTP mail address
+$addresses = '@montenidoaffiliates.com' , '@clementineprograms.com' , '@oliverpyattcenters.com' , '@montenido.com'
+$proxyAddresses = @("SMTP:$newAduserSAM$SMTPmail")
+
+foreach ( $a in $addresses ){
+    
+    if ( $a -ne $SMTPmail ){
+        
+        $proxyAddresses = $proxyAddresses + "smtp:$newAduserSAM$a"
+    }
+}
+
+$proxyAddressesDimits
+set-aduser -identity $newAduserSAM -Add @{ProxyAddresses=$proxyAddresses}
+
+# Sync Files
+Start-ADSyncSyncCycle -PolicyType Delta
+Start-Sleep 5 
+Write-host "Giving time to Sync ..."
+# Change user's password to Welcome11 and enable MFA
+
+#(Get-MsolUser -UserPrincipalName JLigasan@montenidoaffiliates.com).StrongAuthenticationMethods
+#Set-MsolUser -UserPrincipalName $newUserAttrib.UserPrincipalName -StrongAuthenticationMethods @()
+#Set-MsolUserPassword -UserPrincipalName $newUserAttrib.UserPrincipalName -NewPassword "Welcome11"
 
 
-#Copy the information from the old user to copy into the new user 
-$user = Get-ADUser -Filter "GivenName -eq '$oldfirst' -and Surname -eq '$oldlast'" -Properties * ;
-$Company = $user.Company;
-$title = $user.Title;
-$off = $user.Office;
-$tel = $user.telephoneNumber;
-$dept = $user.Department;
-$co = $user.country;
-$st = $user.state;
-$man = $user.Manager
-Set-ADUser $newaduser -Company $Company;  
-Set-ADUser $newaduser -Office $off;
-Set-ADUser $newaduser -State $st;
-Set-ADUser $newaduser -Country $co ;
-Set-ADUser $newaduser -Manager $man; 
-Set-ADUser $newaduser -Title $title ;
-Set-ADUser $newaduser -telephoneNumber $tel;
-Set-ADUser $newaduser -Department $dept;
-Set-ADUser $newaduser -Description $newaduser;
-set-aduser $newaduser -city $city;
-Set-ADUser $newaduser -StreetAddress $address;
-Set-ADUser $newaduser -State $state;
-Set-ADUser $newaduser -EmailAddress $newaduser'@ceramictechnics.com';
+# Reset password
+# Set-ADAccountPassword -Identity $user -Reset -NewPassword (ConvertTo-SecureString -AsPlainText "$Pass" -Force)
 
-#copy groups
-Get-ADUser -Identity $olduser -Properties memberof | Select-Object -ExpandProperty memberof |  Add-ADGroupMember -Members $newaduser
+<#
+write-host "`n add Zoom licenses  `n"
+write-host "`n add user to Sharefile => https://montenido.sharefile.com/ `n"
+[system.Diagnostics.Process]::Start("chrome","https://montenido.sharefile.com/users/clients/browse")
+[system.Diagnostics.Process]::Start("chrome","https://montenido.zoom.us/account/user#/")
+#>
 
-#move the new user into the correct OU
-$targetDN = get-aduser -identity $olduser | Select-Object -ExpandProperty DistinguishedName
-get-aduser $newaduser | Move-ADObject -TargetPath $TARGETDN.substring($targetDN.IndexOf("OU="))
+# setup remote desktop
+$Server="mna-rds.mna.local"
+$User="MNA\$newAduserSAM"
+$Password="Welcome11"
+$SecurePassword = $Password | ConvertTo-SecureString -AsPlainText -Force
 
+#cmdkey /generic:$Server /user:$User /pass:$SecurePassword
+#mstsc /v:$Server /h:1080 /w:1920
+write-host "`n `n `n"
+Write-Host @" 
+** For Sharefile **
 
-#Rename the User
-Set-ADUser $newaduser -PassThru | Rename-ADObject -NewName $Newname;
+Hello,
 
+I just sent you an e-mail link to activate your MN&A Citrix Share File Account.
 
-$email = get-aduser $newaduser | select-object -ExpandProperty userprincipalname
+This online file share service contains all the MN&A Kipu & Clinical documentation plus training materials.
 
-#create user mailbox in 365
-$User = "cspiadmin@ceramictechnics.com"
-$Pass = "Bl0wingR0ck21"
-$LiveCred = New-Object System.Management.Automation.PsCredential($User,(ConvertTo-SecureString $Pass -AsPlainText -Force))
-$Cred = Get-Credential $LiveCred
-$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.outlook.com/powershell/ -Credential $Cred -Authentication Basic -AllowRedirection
-Import-PSSession $Session
+Enjoy!
+"@
+write-host "`n `n `n"
+Write-Host @"
 
-write-host "creating email address"
-write-host User Password is: $pass;
+Hello Michelle,
 
-New-Mailbox -Alias $newaduser `
--Name $newfirst `
--FirstName $newfirst `
--LastName $newlast `
--DisplayName "$Newname" `
--MicrosoftOnlineServicesID $newaduser@ceramictechnics.com `
--Password (Read-Host -AsSecureString "Input User Password") `
--ResetPasswordOnNextLogon $False;
+I have created $newfirstname  account, here is the login information.
 
+Username:$newAduserSAM
+Email: $newAduserSAM$SMTPmail
+Password: $Password
 
-#Enable Archiving
-Enable-Mailbox -Identity $newaduser –Archive
+I have created the Zoom and Sharefile accounts and sent to users email.
 
-Remove-PSSession $Session
+Adding internal IT for additional access.
+
+Thank you,
+"@
+write-host "`n `n `n"
+Write-Host @"
+
+Make sure the following apps are selected: 
+
+- Azure Rights Management
+
+- Common Data Service
+
+- Exchange Online (Plan 2)
+
+- Information Protection for Office 365 - Standard
+
+- Microsoft 365 Apps for enterprise
+
+* Disable OWA for Oulook Apps
+Monte Nido & Affiliates
+"@
