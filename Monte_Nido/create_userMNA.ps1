@@ -139,7 +139,7 @@ Write-Host @"
 
 Hello Michelle,
 
-I have created $newfirstname  account, here is the login information.
+I have created $newfirstname's  account, here is the login information.
 
 Username:$newAduserSAM
 Email: $newAduserSAM$SMTPmail
